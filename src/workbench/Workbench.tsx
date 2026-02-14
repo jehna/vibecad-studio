@@ -15,7 +15,7 @@ import VisualizerPane, { VisualizerButtons } from "./VisualizerPane";
 
 export const WorkbenchStructure = observer(function WorkbenchStructure() {
   const store = useEditorStore();
-  const { modelSlug } = useParams<{ modelSlug?: string }>();
+  const { modelSlug } = useParams();
 
   useEffect(() => {
     if (modelSlug) {

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { useLocation, useHistory } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { useControls, levaStore, Leva } from "leva";
 
@@ -67,7 +67,7 @@ const AutoConfig = ({ updateParams, defaultParams, hidden, collapsed }: any) => 
 
 const useDisplayMode = () => {
   const { search } = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const searchParams = new URLSearchParams(search);
 
   const niceViewer = searchParams.has("display");
@@ -75,7 +75,7 @@ const useDisplayMode = () => {
     if (niceViewer) searchParams.delete("display");
     else searchParams.set("display", "true");
 
-    history.replace({ search: searchParams.toString() });
+    navigate({ search: searchParams.toString() }, { replace: true });
   };
   return [niceViewer, toggleView] as const;
 };

@@ -24,7 +24,7 @@ async function loadModel(slug: string) {
   if (import.meta.env.DEV) {
     const t = reloadTimestamps[slug] || 0;
     const query = t ? `?t=${t}` : "";
-    mod = await import(/* @vite-ignore */ `/src/models/${slug}/model.ts${query}`);
+    mod = await import(/* @vite-ignore */ `${import.meta.env.BASE_URL}src/models/${slug}/model.ts${query}`);
   } else {
     const path = `./models/${slug}/model.ts`;
     if (!(path in modelModules)) throw new Error(`Model "${slug}" not found`);
@@ -110,7 +110,7 @@ const buildShapesFromModel = async (slug: string, params?: any) => {
   const oc = await OC;
   (replicad as any).setOC(oc);
   if (!(replicad as any).getFont())
-    await (replicad as any).loadFont("/fonts/HKGrotesk-Regular.ttf");
+    await (replicad as any).loadFont(`${import.meta.env.BASE_URL}fonts/HKGrotesk-Regular.ttf`);
 
   let shapes;
   const helper = new StudioHelper();

@@ -14,7 +14,7 @@ const TEST_URL =
   "https%3A%2F%2Fraw.githubusercontent.com%2Fsgenoud%2Freplicad%2Fmain%2Fpackages%2Freplicad-docs%2Fexamples%2FsimpleVase.js";
 
 const useCode = (readyToBuild: React.MutableRefObject<boolean>, setError: (e: any) => void) => {
-  let { shapeURL } = useParams<{ shapeURL?: string }>();
+  let { shapeURL } = useParams();
   const [code, setCode] = useState<string | null>(null);
 
   const [rawCode, setRawCode] = useState<string | null>(null);

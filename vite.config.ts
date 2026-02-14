@@ -27,6 +27,7 @@ function modelHmrPlugin(): Plugin {
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: "/vibecad-studio/",
   plugins: [
     modelHmrPlugin(),
     reactPlugin(),
