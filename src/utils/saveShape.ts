@@ -14,19 +14,16 @@ const mapExt = (ext: string) => {
 export default async function saveShapes(
   shapeId: string,
   fileType = "stl",
-  code?: string
 ) {
-  const defaultName =
-    code && (await builderAPI.extractDefaultNameFromCode(code));
   const shapes = await builderAPI.exportShape(fileType, shapeId);
   if (shapes.length === 1) {
     const { blob, name } = shapes[0];
     const ext = mapExt(fileType);
 
     await fileSave(blob, {
-      fileName: `${defaultName || name || "shape"}.${ext}`,
+      fileName: `${name || "shape"}.${ext}`,
       extensions: [`.${ext}`],
-      description: `Save ${defaultName || name || "shape"} as ${fileType}`,
+      description: `Save ${name || "shape"} as ${fileType}`,
     });
     return;
   }
@@ -39,7 +36,7 @@ export default async function saveShapes(
   await fileSave(zipBlob, {
     id: "exports",
     description: "Save zip",
-    fileName: `${defaultName || "shapes"}.zip`,
+    fileName: "shapes.zip",
     extensions: [".zip"],
   });
 }

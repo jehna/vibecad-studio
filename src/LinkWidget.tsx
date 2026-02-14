@@ -210,7 +210,7 @@ export default function LinkWidget() {
       }
 
       if (event.data.command === "download") {
-        saveShape("defaultShape", event.data.params.format || "stl", code!);
+        saveShape("defaultShape", event.data.params.format || "stl");
       }
 
       if (event.data.command === "load-font") {
@@ -273,7 +273,7 @@ export default function LinkWidget() {
         disableDamping={checkParam("disable-damping")}
         showParams={checkParam("params")}
         disableMenus={checkParam("enable-post-message-mode")}
-        onSave={(format: string) => saveShape("defaultShape", format, code!)}
+        onSave={(format: string) => saveShape("defaultShape", format)}
         canSave={geometryHasBeenComputed}
       />
       <div className="absolute text-xs bottom-6 left-1/2 -translate-x-1/2 [&>a]:no-underline">

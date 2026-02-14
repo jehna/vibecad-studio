@@ -1,13 +1,34 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import reactPlugin from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
 import { VitePWA } from "vite-plugin-pwa";
 
+function modelHmrPlugin(): Plugin {
+  return {
+    name: "model-hmr",
+    handleHotUpdate(ctx) {
+      if (
+        ctx.file.includes("/models/") &&
+        ctx.file.endsWith("model.ts")
+      ) {
+        const slug = ctx.file.match(/\/models\/([^/]+)\//)?.[1];
+        ctx.server.ws.send({
+          type: "custom",
+          event: "model-update",
+          data: { slug },
+        });
+        return [];
+      }
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    modelHmrPlugin(),
     reactPlugin(),
     tailwindcss(),
     VitePWA({
@@ -70,6 +91,9 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  worker: {
+    format: "es",
   },
   optimizeDeps: { exclude: ["replicad"] },
   build: {

@@ -6,8 +6,6 @@ import UIState from "./ui-state";
 import CodeState from "./code-state";
 import SelectedInfo from "./selected-info";
 
-import codeInit from "./codeInit";
-
 const inSeries = (func: () => Promise<void>) => {
   let refresh: boolean;
   let currentlyRunning = false;
@@ -38,7 +36,7 @@ const AppState = types
     selectedInfo: SelectedInfo,
     config: types.optional(
       types.model({
-        code: types.optional(types.string, ""),
+        modelSlug: types.optional(types.string, ""),
       }),
       {}
     ),
@@ -51,8 +49,8 @@ const AppState = types
       return !!(self as any).error?.error;
     },
 
-    get codeInitialized() {
-      return !!self.config.code;
+    get modelInitialized() {
+      return !!self.config.modelSlug;
     },
   }))
   .volatile(() => ({
@@ -67,14 +65,9 @@ const AppState = types
     currentLabels: [] as any[],
   }))
   .actions((self) => ({
-    updateCode(newCode: string) {
-      self.config.code = newCode;
+    initModel(slug: string) {
+      self.config.modelSlug = slug;
     },
-
-    initCode: flow(function* (modelSlug?: string) {
-      const code = yield codeInit(modelSlug);
-      self.config.code = code;
-    }),
 
     toggleExceptions: flow(function* toggleExceptions() {
       self.exceptionMode = yield api.toggleExceptions();
@@ -84,8 +77,8 @@ const AppState = types
       self.ui.deHighlight();
       self.processing = true;
       try {
-        const mesh = yield api.buildShapesFromCode(
-          self.currentValues.code,
+        const mesh = yield api.buildShapesFromModel(
+          self.currentValues.modelSlug,
           params
         );
 
@@ -103,8 +96,8 @@ const AppState = types
       }
 
       try {
-        self.defaultParams = yield api.extractDefaultParamsFromCode(
-          self.currentValues.code
+        self.defaultParams = yield api.getDefaultParams(
+          self.currentValues.modelSlug
         );
       } catch (e) {
         console.log("no default params");
@@ -119,7 +112,7 @@ const AppState = types
     const processor = inSeries(self.process as any);
 
     const run = async () => {
-      if (!self.currentValues.code) return;
+      if (!self.currentValues.modelSlug) return;
       self.exceptionMode;
       await processor();
     };

@@ -1,17 +1,18 @@
-const { draw, drawCircle, loft, Sketches, Wire, Solid, Compound } = replicad;
+import { draw, drawCircle, loft, type Sketches, type Wire, type Solid, type Compound } from "replicad";
 
-const neckLength = 170;
-const neckThickness = 6.5;
-const baseWidth = 45;
-
-const wallMountThickness = 8;
-const rodRadius = 12;
-const tipRadius = 14;
-const transitionHeight = 10;
-const transitionThickness = 8;
-const hookHeight = 16;
-const uCurveHeight = 10;
-const holeRadius = 2.6;
+export const defaultParams = {
+  neckLength: 170,
+  neckThickness: 6.5,
+  baseWidth: 45,
+  wallMountThickness: 8,
+  rodRadius: 12,
+  tipRadius: 14,
+  transitionHeight: 10,
+  transitionThickness: 8,
+  hookHeight: 16,
+  uCurveHeight: 10,
+  holeRadius: 2.6,
+};
 
 function uSketchAtZ(z: number, width: number) {
   const halfWidth = width / 2;
@@ -24,7 +25,14 @@ function uSketchAtZ(z: number, width: number) {
     .sketchOnPlane("XY", z) as Sketches;
 }
 
-const main = () => {
+export function main(params: typeof defaultParams) {
+  const {
+    neckLength, neckThickness, baseWidth,
+    wallMountThickness, rodRadius, tipRadius,
+    transitionHeight, transitionThickness,
+    hookHeight, uCurveHeight, holeRadius,
+  } = params;
+
   const rodLength = neckLength;
   const hookThickness = neckThickness;
   const wallMountRadius = baseWidth;
@@ -44,11 +52,11 @@ const main = () => {
     uSketchAtZ(transitionEnd, tipRadius).wires() as Wire,
   ]) as Solid;
 
-  const holeCenterZ = transitionEnd + uCurveHeight;
-
   const keepVolume = uSketchAtZ(transitionEnd, tipRadius).extrude(
     hookHeight + uCurveHeight
   ) as Solid;
+
+  const holeCenterZ = transitionEnd + uCurveHeight;
 
   const hole = drawCircle(holeRadius)
     .sketchOnPlane("YZ", [hookThickness / 2, tipRadius / 2])
@@ -73,4 +81,4 @@ const main = () => {
     .intersect(fullKeepVolume) as Compound;
 
   return rounded;
-};
+}

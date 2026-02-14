@@ -1,12 +1,16 @@
-const { draw, assembleWire, genericSweep, sketchCircle, Wire, Solid } = replicad;
+import { draw, assembleWire, genericSweep, sketchCircle, type Wire, type Solid } from "replicad";
 
-const thickness = 8;
-const height = 10;
-const skiThickness = 32;
-const skiHeight = 63;
-const poleThickness = 15;
+export const defaultParams = {
+  thickness: 8,
+  height: 12,
+  skiThickness: 32,
+  skiHeight: 63,
+  poleThickness: 15,
+};
 
-const main = () => {
+export function main(params: typeof defaultParams) {
+  const { thickness, height, skiThickness, skiHeight, poleThickness } = params;
+
   const profile = draw()
     .hLine(skiThickness * 1.2 + thickness / 2)
     .vLine(skiHeight)
@@ -57,14 +61,14 @@ const main = () => {
 
   const spineAssembled = assembleWire([spine]);
   const swept = genericSweep(sectionWire, spineAssembled, config, false)
-    .fillet(thickness / 2.01, (e) =>
+    .fillet(thickness / 2.01, (e: any) =>
       e.inPlane("XZ", -spineEndPoint.y).inDirection("Z")
     )
-    .fillet(thickness, (e) => e.withinDistance(40, elbow).inDirection("Z"))
-    .fillet(thickness, (e) => e.withinDistance(40, corner).inDirection("Z"))
-    .fillet(thickness, (e) => e.withinDistance(50, neck).inDirection("Z"))
+    .fillet(thickness, (e: any) => e.withinDistance(40, elbow).inDirection("Z"))
+    .fillet(thickness, (e: any) => e.withinDistance(40, corner).inDirection("Z"))
+    .fillet(thickness, (e: any) => e.withinDistance(50, neck).inDirection("Z"))
     .fuse(holder as Solid)
     .fuse(fastener as Solid);
 
   return swept.clone().fuse(swept.mirror("YZ"));
-};
+}

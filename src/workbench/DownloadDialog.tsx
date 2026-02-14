@@ -65,7 +65,7 @@ export default function DownloadDialog({ onClose }: { onClose: () => void }) {
       );
     } else {
       try {
-        await saveShape("defaultShape", saveMode, store.code.current);
+        await saveShape("defaultShape", saveMode);
       } catch (e) {
         console.error(e);
       } finally {

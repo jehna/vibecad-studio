@@ -1,8 +1,12 @@
-const { draw } = replicad;
+import { draw } from "replicad";
 
-const main = () => {
-  const baseWidth = 50;
-  const height = 100;
+export const defaultParams = {
+  baseWidth: 25,
+  height: 100,
+};
+
+export function main(params: typeof defaultParams) {
+  const { baseWidth, height } = params;
 
   const profile = draw()
     .hLine(baseWidth)
@@ -13,7 +17,7 @@ const main = () => {
       endTangent: [0, 1],
       startFactor: 3,
     })
-    .smoothSplineTo([baseWidth , height], {
+    .smoothSplineTo([baseWidth, height], {
       endTangent: [0, 1],
       startFactor: 3,
     })
@@ -23,6 +27,6 @@ const main = () => {
   return profile
     .sketchOnPlane("XZ")
     .revolve()
-    .shell(5, (f) => f.containsPoint([0, 0, height]))
-    .fillet(1.7, (e) => e.inPlane("XY", height));
-};
+    .shell(6, (f: any) => f.containsPoint([0, 0, height]))
+    .fillet(1.7, (e: any) => e.inPlane("XY", height));
+}

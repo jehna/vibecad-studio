@@ -4,109 +4,45 @@ import * as replicad from "replicad";
 import initOpenCascade from "./initOCSingle";
 import initOpenCascadeWithExceptions from "./initOCWithExceptions";
 import { StudioHelper } from "./utils/StudioHelper";
-import { runInContext, buildModuleEvaluator } from "./vm";
 
 import { renderOutput, ShapeStandardizer } from "./utils/renderOutput";
 
 (self as any).replicad = replicad;
 
-export function runInContextAsOC(code: string, context: Record<string, any> = {}) {
-  const editedText = `
-${code}
-let dp = {}
-try {
-  dp = defaultParams;
-} catch (e) {}
-return main(replicad, __inputParams || dp)
-  `;
+// Production: static glob for bundling. Dev: unused (uses @vite-ignore dynamic imports).
+const modelModules = import.meta.glob<{ main: (params: any) => any; defaultParams: any }>(
+  "./models/*/model.ts"
+);
 
-  return runInContext(editedText, context);
-}
+const moduleCache: Record<string, any> = {};
+let reloadTimestamps: Record<string, number> = {};
 
-async function runAsFunction(code: string, params?: any) {
-  const oc = await OC;
+async function loadModel(slug: string) {
+  if (moduleCache[slug]) return moduleCache[slug];
 
-  return runInContextAsOC(code, {
-    oc,
-    replicad,
-    __inputParams: params,
-  });
-}
-
-export async function runAsModule(code: string, params?: any) {
-  const module = await buildModuleEvaluator(code);
-
-  if (module.default) return module.default(params || module.defaultParams);
-  return module.main(replicad, params || module.defaultParams || {});
-}
-
-const runCode = async (code: string, params?: any) => {
-  if (code.match(/^\s*export\s+/m)) {
-    return runAsModule(code, params);
-  }
-  return runAsFunction(code, params);
-};
-
-const extractDefaultParamsFromCode = async (code: string) => {
-  if (code.match(/^\s*export\s+/m)) {
-    const module = await buildModuleEvaluator(code);
-    return module.defaultParams || null;
+  let mod;
+  if (import.meta.env.DEV) {
+    const t = reloadTimestamps[slug] || 0;
+    const query = t ? `?t=${t}` : "";
+    mod = await import(/* @vite-ignore */ `/src/models/${slug}/model.ts${query}`);
+  } else {
+    const path = `./models/${slug}/model.ts`;
+    if (!(path in modelModules)) throw new Error(`Model "${slug}" not found`);
+    mod = await modelModules[path]();
   }
 
-  const editedText = `
-${code}
-try {
-  return defaultParams;
-} catch (e) {
-  return null;
+  moduleCache[slug] = mod;
+  return mod;
 }
-  `;
 
-  try {
-    return runInContext(editedText, {});
-  } catch (e) {
-    return {};
-  }
-};
-
-const extractDefaultNameFromCode = async (code: string) => {
-  if (code.match(/^\s*export\s+/m)) {
-    const module = await buildModuleEvaluator(code);
-    return module.defaultName;
-  }
-
-  const editedText = `
-${code}
-try {
-  return defaultName;
-} catch (e) {
-  return;
+async function reloadModel(slug: string) {
+  delete moduleCache[slug];
+  reloadTimestamps[slug] = Date.now();
 }
-  `;
 
-  try {
-    return runInContext(editedText, {});
-  } catch (e) {
-    return;
-  }
-};
-
-const computeLabels = async (code: string, params?: any) => {
-  if (!code.match(/^\s*export\s+/m)) return [];
-  const module = await buildModuleEvaluator(code);
-
-  const oc = await OC;
-  (replicad as any).setOC(oc);
-  if (!(replicad as any).getFont())
-    await (replicad as any).loadFont("/fonts/HKGrotesk-Regular.ttf");
-
-  const labels = module.labels?.(params || module.defaultParams || {}) || [];
-
-  return labels.filter((labelConfig: any) => {
-    return (
-      labelConfig && labelConfig.label && labelConfig.from && labelConfig.to
-    );
-  });
+const getDefaultParams = async (slug: string) => {
+  const mod = await loadModel(slug);
+  return mod.defaultParams || null;
 };
 
 const SHAPES_MEMORY: Record<string, any> = {};
@@ -170,7 +106,7 @@ const formatException = (oc: any, e: any) => {
   };
 };
 
-const buildShapesFromCode = async (code: string, params?: any) => {
+const buildShapesFromModel = async (slug: string, params?: any) => {
   const oc = await OC;
   (replicad as any).setOC(oc);
   if (!(replicad as any).getFont())
@@ -184,7 +120,10 @@ const buildShapesFromCode = async (code: string, params?: any) => {
     (self as any).$ = helper;
     (self as any).registerShapeStandardizer =
       standardizer.registerAdapter.bind(standardizer);
-    shapes = await runCode(code, params);
+
+    const mod = await loadModel(slug);
+    const effectiveParams = params || mod.defaultParams || {};
+    shapes = await mod.main(effectiveParams);
   } catch (e) {
     return formatException(oc, e);
   }
@@ -196,8 +135,7 @@ const buildShapesFromCode = async (code: string, params?: any) => {
       const editedShapes = helper.apply(shapes);
       SHAPES_MEMORY.defaultShape = shapes;
       return editedShapes;
-    },
-    code && (await extractDefaultNameFromCode(code))
+    }
   );
 };
 
@@ -215,6 +153,7 @@ const buildBlob = (
   if (fileType === "step") return shape.blobSTEP();
   throw new Error(`Filetype "${fileType}" unknown for export.`);
 };
+
 const exportShape = async (
   fileType = "stl",
   shapeId = "defaultShape",
@@ -265,11 +204,10 @@ const edgeInfo = (subshapeIndex: number, edgeIndex: number, shapeId = "defaultSh
 
 const service = {
   ready: () => OC.then(() => true),
-  buildShapesFromCode,
+  buildShapesFromModel,
+  getDefaultParams,
+  reloadModel,
   loadFont,
-  computeLabels,
-  extractDefaultParamsFromCode,
-  extractDefaultNameFromCode,
   exportShape,
   edgeInfo,
   faceInfo,
