@@ -2,6 +2,8 @@
 
 A browser-based CAD modeling workbench built on [replicad](https://replicad.xyz) and OpenCASCADE. Write JavaScript code to create parametric 3D models, visualize them in real-time, and export to STEP, STL, and other formats.
 
+**[See the models live](https://jehna.github.io/vibecad-studio/)**
+
 Forked from [Replicad Studio](https://studio.replicad.xyz/) by QuaroTech Sarl.
 
 ## Features
@@ -48,10 +50,14 @@ Create a new folder under `src/models/` with a `model.ts` file containing your r
 ```
 src/models/my-model/
   model.ts    # replicad JavaScript code
-  index.ts    # exports { name, description, slug, code }
+  index.ts    # exports { name, description, slug }
 ```
 
 See `src/models/example-vase/` for reference. Models are automatically discovered and shown on the landing page.
+
+### Using Claude Code
+
+This project includes a `/vibe-model` Claude Code skill that helps you create and modify models. It knows the file conventions, replicad API, and existing model patterns. Run `/vibe-model` in Claude Code to get started.
 
 ## Tech Stack
 
