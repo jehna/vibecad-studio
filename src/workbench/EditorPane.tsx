@@ -10,12 +10,17 @@ import Splitter, { GutterTheme, SplitDirection } from "@devbookhq/splitter";
 import "./loadMonaco";
 import useEditorStore from "@/store/useEditorStore";
 import downloadCode from "../utils/downloadCode";
-import { HeaderButton } from "./panes";
 import Download from "../icons/Download";
 import Share from "../icons/Share";
 import LoadingScreen from "../components/LoadingScreen";
 import { LinkEditor } from "../components/LinkEditor";
-import { Button } from "../components/Button";
+import { Button as LegacyButton } from "../components/Button";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 import { Dialog, DialogTitle, DialogBody } from "../components/Dialog";
 import { useAutoload } from "./Autoload";
@@ -72,9 +77,9 @@ export default observer(function EditorPane() {
             {store.error.stack && <pre>{store.error.stack}</pre>}
             {store.exceptionMode == "single" && (
               <div className="flex justify-end">
-                <Button onClick={store.toggleExceptions}>
+                <LegacyButton onClick={store.toggleExceptions}>
                   Enable full exception mode
-                </Button>
+                </LegacyButton>
               </div>
             )}
           </div>
@@ -88,9 +93,9 @@ export default observer(function EditorPane() {
             kernel errors.
           </div>
           <div className="flex justify-end">
-            <Button onClick={store.toggleExceptions}>
+            <LegacyButton onClick={store.toggleExceptions}>
               Disable full exception mode
-            </Button>
+            </LegacyButton>
           </div>
         </div>
       )}
@@ -131,19 +136,49 @@ export const EditorButtons = observer(() => {
     <>
       {filePickerSupported && (
         <>
-          <HeaderButton onClick={toggleAutoload} title="Toggle autoreload">
-            <Reload />
-          </HeaderButton>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-[#d4d4d4] hover:bg-white/10 hover:text-white"
+                onClick={toggleAutoload}
+              >
+                <Reload />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Toggle autoreload</TooltipContent>
+          </Tooltip>
           <div className="flex-1" />
         </>
       )}
 
-      <HeaderButton onClick={() => setShare(true)} title="Share">
-        <Share />
-      </HeaderButton>
-      <HeaderButton onClick={download} title="Download">
-        <Download />
-      </HeaderButton>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-[#d4d4d4] hover:bg-white/10 hover:text-white"
+            onClick={() => setShare(true)}
+          >
+            <Share />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Share</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-[#d4d4d4] hover:bg-white/10 hover:text-white"
+            onClick={download}
+          >
+            <Download />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Download</TooltipContent>
+      </Tooltip>
       {share && <ShareDialog onClose={() => setShare(false)} />}
     </>
   );

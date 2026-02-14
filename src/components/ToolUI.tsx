@@ -9,7 +9,7 @@ interface ParamsSectionProps {
 export const ParamsSection = ({ children, className }: ParamsSectionProps) => (
   <div
     className={cn(
-      "bg-[var(--bg-color)] font-mono text-[11px] py-2.5 gap-y-2.5",
+      "bg-background font-mono text-[11px] py-2.5 gap-y-2.5",
       className
     )}
   >
@@ -25,7 +25,7 @@ interface LabelledBlockProps {
 
 export const LabelledBlock = ({ label, labelFor, children }: LabelledBlockProps) => {
   return (
-    <div className="flex flex-col px-2.5 [&>label]:flex [&>label]:h-6 [&>label]:items-center [&>label]:text-[var(--color-primary)]">
+    <div className="flex flex-col px-2.5 [&>label]:flex [&>label]:h-6 [&>label]:items-center [&>label]:text-primary">
       <label htmlFor={labelFor}>{label}</label>
       {children}
     </div>

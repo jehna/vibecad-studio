@@ -32,7 +32,7 @@ const NumberEditor = React.memo(function NumberEditor({
       type="number"
       onChange={handleChange}
       value={val}
-      className="text-right outline-none text-inherit font-inherit border-none appearance-none px-1.5 h-6 leading-[1.15] rounded-[3px] bg-[var(--bg-color-secondary)] hover:shadow-[inset_0_0_0_1px_var(--color-primary)]"
+      className="text-right outline-none text-inherit font-inherit border-none appearance-none px-1.5 h-6 leading-[1.15] rounded-[3px] bg-card hover:shadow-[inset_0_0_0_1px_var(--color-primary)]"
       {...props}
     />
   );
@@ -49,7 +49,7 @@ export default observer(function ClippingParams() {
   return (
     <ParamsSection>
       <LabelledBlock label="Clipping Planes">
-        <div className="flex justify-between mb-2 bg-[var(--bg-color)] [&>label]:flex [&>label]:items-center">
+        <div className="flex justify-between mb-2 bg-background [&>label]:flex [&>label]:items-center">
           <label>
             <input
               onClick={() => store.ui.clip.setPlane("XY")}
@@ -57,7 +57,7 @@ export default observer(function ClippingParams() {
               type="radio"
               readOnly
             />
-            <span className="mx-0.5 text-center text-[var(--color-primary)]">XY</span>
+            <span className="mx-0.5 text-center text-primary">XY</span>
           </label>
           <label>
             <input
@@ -66,7 +66,7 @@ export default observer(function ClippingParams() {
               type="radio"
               readOnly
             />
-            <span className="mx-0.5 text-center text-[var(--color-primary)]">XZ</span>
+            <span className="mx-0.5 text-center text-primary">XZ</span>
           </label>
           <label>
             <input
@@ -75,7 +75,7 @@ export default observer(function ClippingParams() {
               type="radio"
               readOnly
             />
-            <span className="mx-0.5 text-center text-[var(--color-primary)]">YZ</span>
+            <span className="mx-0.5 text-center text-primary">YZ</span>
           </label>
         </div>
       </LabelledBlock>

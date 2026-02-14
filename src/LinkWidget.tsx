@@ -236,7 +236,7 @@ export default function LinkWidget() {
 
   if (error)
     return (
-      <div className="flex flex-col items-center justify-center w-full min-h-full p-4 bg-[var(--bg-color)]">
+      <div className="flex flex-col items-center justify-center w-full min-h-full p-4 bg-background">
         <h4>Error</h4>
         {error.type === "url" && (
           <>
@@ -295,7 +295,7 @@ export default function LinkWidget() {
 
 export function MakeLink() {
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-full p-4 bg-[var(--bg-color)]">
+    <div className="flex flex-col items-center justify-center w-full min-h-full p-4 bg-background">
       <div className="flex relative flex-col w-full max-w-[600px]">
         <h4>Create a link to a replicad file</h4>
         <LinkEditor />

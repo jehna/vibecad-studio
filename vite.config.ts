@@ -43,7 +43,7 @@ export default defineConfig({
         ],
         start_url: ".",
         display: "standalone",
-        theme_color: "rgb(90, 130, 150)",
+        theme_color: "#4f46e5",
         background_color: "#ffffff",
       },
       includeAssets: [

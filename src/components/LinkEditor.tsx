@@ -88,7 +88,7 @@ export function LinkEditor({ fromCode }: { fromCode?: string }) {
               Copy
             </Button>
           </div>
-          <hr className="my-12 h-px border-0 border-b border-[var(--color-primary-light)]" />
+          <hr className="my-12 h-px border-0 border-b border-primary-light" />
         </>
       )}
 

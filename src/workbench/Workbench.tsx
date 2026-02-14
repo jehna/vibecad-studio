@@ -8,6 +8,7 @@ import useEditorStore, {
 } from "@/store/useEditorStore";
 
 import { Pane } from "./panes";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 import EditorPane, { EditorButtons } from "./EditorPane";
 import VisualizerPane, { VisualizerButtons } from "./VisualizerPane";
@@ -42,10 +43,12 @@ export const WorkbenchStructure = observer(function WorkbenchStructure() {
 
 export default function Workbench() {
   return (
-    <div className="h-screen w-screen max-h-screen max-w-screen flex flex-col relative overflow-y-hidden [&_.custom-gutter-theme]:bg-[var(--color-primary-light)] dark:[&_.custom-gutter-theme]:bg-[var(--bg-color)]">
-      <EditorContextProvider>
-        <WorkbenchStructure />
-      </EditorContextProvider>
-    </div>
+    <TooltipProvider>
+      <div className="h-screen w-screen max-h-screen max-w-screen flex flex-col relative overflow-y-hidden [&_.custom-gutter-theme]:bg-primary-light dark:[&_.custom-gutter-theme]:bg-background">
+        <EditorContextProvider>
+          <WorkbenchStructure />
+        </EditorContextProvider>
+      </div>
+    </TooltipProvider>
   );
 }

@@ -19,22 +19,29 @@
 }
 
 @theme inline {
-  --color-background: #f2f3f4;
-  --color-foreground: #444;
-  --color-card: #fff;
-  --color-card-foreground: #444;
-  --color-primary: rgb(90, 130, 150);
-  --color-primary-light: rgb(170, 190, 200);
-  --color-primary-dark: rgb(60, 90, 110);
-  --color-secondary: #d49991;
-  --color-secondary-light: #f2e0de;
-  --color-secondary-dark: #c0695d;
-  --color-muted: #e5e7eb;
-  --color-muted-foreground: #6b7280;
-  --color-border: #ccc;
-  --color-ring: rgb(90, 130, 150);
-  --color-header-primary: rgb(90, 130, 150);
-  --color-header-secondary: rgb(60, 90, 110);
+  --color-background: #f8fafc;
+  --color-foreground: #1e293b;
+  --color-card: #ffffff;
+  --color-card-foreground: #1e293b;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1e293b;
+  --color-primary: #4f46e5;
+  --color-primary-foreground: #ffffff;
+  --color-primary-light: #e0e7ff;
+  --color-primary-dark: #3730a3;
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #1e293b;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #1e293b;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #4f46e5;
+  --color-header-primary: #4f46e5;
+  --color-header-secondary: #3730a3;
 
   --font-sans: "HKGrotesk", sans-serif;
   --radius-sm: 0.2em;
@@ -42,44 +49,52 @@
   --radius-lg: 0.6em;
 }
 
-/* Legacy CSS custom properties for existing components */
+/* Legacy CSS custom properties for Leva compatibility */
 :root {
-  --text-color: #444;
-  --bg-color-secondary: white;
-  --color-primary: rgb(90, 130, 150);
-  --color-primary-light: rgb(170, 190, 200);
-  --color-primary-dark: rgb(60, 90, 110);
-  --color-secondary: #d49991;
-  --color-secondary-light: #f2e0de;
-  --color-secondary-dark: #c0695d;
-  --bg-color: #f2f3f4;
-  --color-header-primary: rgb(90, 130, 150);
-  --color-header-secondary: rgb(60, 90, 110);
-  --color-lines: #ccc;
+  --text-color: #1e293b;
+  --bg-color-secondary: #ffffff;
+  --color-primary: #4f46e5;
+  --color-primary-light: #e0e7ff;
+  --color-primary-dark: #3730a3;
+  --bg-color: #f8fafc;
+  --color-header-primary: #4f46e5;
+  --color-header-secondary: #3730a3;
+  --color-lines: #e2e8f0;
 }
 
 @media (prefers-color-scheme: dark) {
   @theme inline {
-    --color-background: #1e1e1e;
-    --color-foreground: #f2f2f2;
-    --color-card: #2e2e2e;
-    --color-card-foreground: #f2f2f2;
-    --color-primary: rgb(122, 176, 204);
-    --color-primary-light: rgb(60, 90, 110);
-    --color-primary-dark: rgb(170, 190, 200);
-    --color-muted: #374151;
-    --color-muted-foreground: #9ca3af;
-    --color-border: #333;
+    --color-background: #020617;
+    --color-foreground: #f8fafc;
+    --color-card: #0f172a;
+    --color-card-foreground: #f8fafc;
+    --color-popover: #0f172a;
+    --color-popover-foreground: #f8fafc;
+    --color-primary: #818cf8;
+    --color-primary-foreground: #1e1b4b;
+    --color-primary-light: #312e81;
+    --color-primary-dark: #a5b4fc;
+    --color-secondary: #1e293b;
+    --color-secondary-foreground: #f8fafc;
+    --color-muted: #1e293b;
+    --color-muted-foreground: #94a3b8;
+    --color-accent: #1e293b;
+    --color-accent-foreground: #f8fafc;
+    --color-destructive: #dc2626;
+    --color-destructive-foreground: #ffffff;
+    --color-border: #334155;
+    --color-input: #334155;
+    --color-ring: #818cf8;
   }
 
   :root {
-    --color-primary: rgb(122, 176, 204);
-    --color-primary-light: rgb(60, 90, 110);
-    --color-primary-dark: rgb(170, 190, 200);
-    --bg-color: #1e1e1e;
-    --bg-color-secondary: #2e2e2e;
-    --text-color: #f2f2f2;
-    --color-lines: #333;
+    --color-primary: #818cf8;
+    --color-primary-light: #312e81;
+    --color-primary-dark: #a5b4fc;
+    --bg-color: #020617;
+    --bg-color-secondary: #0f172a;
+    --text-color: #f8fafc;
+    --color-lines: #334155;
   }
 }
 
@@ -94,9 +109,9 @@ body {
   font-family: var(--font-sans);
   font-weight: 300;
   overflow-x: hidden;
-  color: var(--text-color);
-  fill: var(--text-color);
-  background-color: white;
+  color: var(--color-foreground);
+  fill: var(--color-foreground);
+  background-color: var(--color-background);
   scroll-behavior: smooth;
 }
 

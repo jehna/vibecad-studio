@@ -62,7 +62,7 @@ const LoadingAnimation = ({ size = "1em" }: { size?: string }) => (
 
 export default function LoadingScreen() {
   return (
-    <div className="flex justify-center items-center w-full h-full bg-[#f2f3f4] text-[var(--color-primary-light)]">
+    <div className="flex justify-center items-center w-full h-full bg-background text-primary-light">
       <LoadingAnimation size="20vh" />
     </div>
   );

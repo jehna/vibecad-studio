@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { InfoTopLeft } from "./FloatingInfo";
-import { Button } from "./Button";
+import { Button } from "@/components/ui/button";
 
 export const InfoMenu = React.forwardRef<
   HTMLDivElement,
@@ -26,8 +26,9 @@ export const ContextButton = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <Button
     ref={ref}
-    icon
-    className={cn("text-2xl relative m-auto", className)}
+    variant="ghost"
+    size="icon"
+    className={cn("text-2xl relative m-auto rounded-full", className)}
     {...props}
   />
 ));

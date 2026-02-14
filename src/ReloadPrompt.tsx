@@ -27,7 +27,7 @@ function ReloadPrompt() {
   if (!needRefresh) return null;
 
   return (
-    <div className="fixed right-0 top-0 mt-16 p-3 border border-[var(--color-primary)] border-r-0 rounded-l z-1 text-left shadow-md bg-[var(--bg-color-secondary)] space-y-2">
+    <div className="fixed right-0 top-0 mt-16 p-3 border border-primary border-r-0 rounded-l z-1 text-left shadow-md bg-card space-y-2">
       <div>
         <span>The site has been updated, click reload to refresh.</span>
       </div>

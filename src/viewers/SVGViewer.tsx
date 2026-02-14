@@ -176,7 +176,7 @@ const SVGWindow = ({ viewbox, withGrid, defaultColor, children }: any) => {
   }, [viewbox, clientRect]);
 
   return (
-    <div ref={canvasRef} className="flex flex-1 bg-[var(--bg-color)]">
+    <div ref={canvasRef} className="flex flex-1 bg-background">
       <RawCanvas
         viewbox={adaptedViewbox}
         withGrid={withGrid}
@@ -191,7 +191,7 @@ const SVGWindow = ({ viewbox, withGrid, defaultColor, children }: any) => {
 const RawCanvas = ({ viewbox, withGrid, defaultColor, children }: any) => {
   return (
     <svg
-      className="bg-[var(--bg-color)] max-w-screen max-h-screen [&_line]:stroke-[var(--color-lines)] [&_#raw-canvas]:stroke-[var(--color-primary-dark)]"
+      className="bg-background max-w-screen max-h-screen [&_line]:stroke-border [&_#raw-canvas]:stroke-primary-dark"
       viewBox={stringifyViewbox(viewbox)}
       width="100%"
       xmlns="http://www.w3.org/2000/svg"

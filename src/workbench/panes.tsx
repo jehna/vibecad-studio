@@ -2,39 +2,71 @@ import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import ErrorBoundary from "../components/ErrorBoundary";
 import Fullscreen from "../icons/Fullscreen";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from "@/components/ui/dropdown-menu";
 
-interface HeaderButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  solid?: boolean;
-  small?: boolean;
+interface HeaderDropdownProps {
+  value: string;
+  onValueChange: (value: string) => void;
+  items: { value: string; label: string }[];
+  triggerLabel?: string;
 }
 
-export const HeaderButton = React.forwardRef<HTMLButtonElement, HeaderButtonProps>(
-  ({ className, solid, small, ...props }, ref) => (
-    <button
-      ref={ref}
-      className={cn(
-        "bg-transparent text-[#d4d4d4] border border-transparent tracking-wider flex items-center justify-center hover:bg-white/10",
-        solid && "bg-[var(--color-primary)]",
-        className
-      )}
-      {...props}
-    />
-  )
-);
-HeaderButton.displayName = "HeaderButton";
-
-export const HeaderSelect = ({
-  className,
-  ...props
-}: React.SelectHTMLAttributes<HTMLSelectElement>) => (
-  <select
-    className={cn(
-      "mr-6 text-[#d4d4d4] border-transparent bg-[var(--color-primary)] rounded-sm",
-      className
-    )}
-    {...props}
-  />
-);
+export const HeaderDropdown = ({
+  value,
+  onValueChange,
+  items,
+  triggerLabel,
+}: HeaderDropdownProps) => {
+  const selected = items.find((item) => item.value === value);
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-[#d4d4d4] hover:bg-white/10 hover:text-white mr-6"
+        >
+          {triggerLabel ?? selected?.label ?? "Select"}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="ml-1"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuRadioGroup value={value} onValueChange={onValueChange}>
+          {items.map((item) => (
+            <DropdownMenuRadioItem key={item.value} value={item.value}>
+              {item.label}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 interface PaneProps {
   children: React.ReactNode;
@@ -55,17 +87,23 @@ export const Pane = ({ children, buttons, aboveOthers }: PaneProps) => {
         aboveOthers && !fullscreen && "z-1"
       )}
     >
-      <div className="flex w-full shrink-0 basis-[var(--pane-header-height)] justify-end h-[var(--pane-header-height)] bg-[var(--color-header-secondary)] py-0.5 px-8 shadow-[inset_0_-6px_12px_3px_rgba(0,0,0,0.35)] [&_*]:text-[calc(var(--pane-header-height)*0.6)]">
+      <div className="flex w-full shrink-0 basis-[var(--pane-header-height)] justify-end items-center h-[var(--pane-header-height)] bg-header-secondary py-0.5 px-2 border-b border-white/10 [&_*]:text-[calc(var(--pane-header-height)*0.6)]">
         {buttons}
-        <HeaderButton
-          solid={fullscreen}
-          onClick={() => setFullscreen(!fullscreen)}
-          title="Fullscreen"
-        >
-          <Fullscreen />
-        </HeaderButton>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={fullscreen ? "secondary" : "ghost"}
+              size="icon"
+              className="h-6 w-6 text-[#d4d4d4] hover:bg-white/10 hover:text-white"
+              onClick={() => setFullscreen(!fullscreen)}
+            >
+              <Fullscreen />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Fullscreen</TooltipContent>
+        </Tooltip>
       </div>
-      <div className="flex w-full flex-1 max-h-[calc(100%-var(--pane-header-height))] bg-[var(--bg-color)] relative">
+      <div className="flex w-full flex-1 max-h-[calc(100%-var(--pane-header-height))] bg-background relative">
         <ErrorBoundary>{children}</ErrorBoundary>
       </div>
     </div>

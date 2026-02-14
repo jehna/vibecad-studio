@@ -124,20 +124,18 @@ export default function StandardUI({
       )}
       {!disableMenus && (
         <InfoMenu noBg hide={niceViewer as boolean}>
-          <ContextButton icon onClick={toggleNiceViewer as () => void}>
+          <ContextButton onClick={toggleNiceViewer as () => void}>
             {niceViewer ? <Configure /> : <Focus />}
           </ContextButton>
           {!niceViewer && (
             <>
               <ContextButton
-                icon
                 disabled={!canSave}
                 onClick={() => onSave("stl")}
               >
                 <Download text="STL" />
               </ContextButton>
               <ContextButton
-                icon
                 disabled={!canSave}
                 onClick={() => onSave("step")}
               >
@@ -147,7 +145,6 @@ export default function StandardUI({
           )}
           {isInIframe && (
             <ContextButton
-              icon
               onClick={() => window.open(window.location.href, "_blank")}
             >
               <NewWindow />

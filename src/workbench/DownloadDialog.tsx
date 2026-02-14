@@ -3,7 +3,7 @@ import { renderToString } from "react-dom/server";
 
 import { fileSave } from "browser-fs-access";
 
-import { Button, ButtonBar } from "../components/Button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogTitle,
@@ -145,12 +145,14 @@ export default function DownloadDialog({ onClose }: { onClose: () => void }) {
         </div>
       </DialogBody>
       <DialogButtons>
-        <ButtonBar>
-          <Button onClick={onClose}>Close</Button>
-          <Button solid onClick={onDownload}>
+        <div className="flex gap-2 justify-end">
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
+          <Button variant="default" onClick={onDownload}>
             Download
           </Button>
-        </ButtonBar>
+        </div>
       </DialogButtons>
     </Dialog>
   );

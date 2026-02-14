@@ -12,7 +12,7 @@ import {
   ReplicadEdgesMesh,
 } from "./replicadMesh";
 
-const colorVariants = (baseColor = "#5a8296") => {
+const colorVariants = (baseColor = "#8B9DC3") => {
   return {
     base: baseColor,
     line: darken(0.2, baseColor),

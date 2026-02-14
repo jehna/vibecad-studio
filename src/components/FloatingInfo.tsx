@@ -13,7 +13,7 @@ export const InfoTopRight = React.forwardRef<HTMLDivElement, FloatingInfoProps>(
       ref={ref}
       className={cn(
         "absolute top-14 right-8 flex flex-col rounded-lg p-2 max-h-[calc(100%-5em)] overflow-y-auto",
-        !noBg && "bg-[var(--bg-color)] border border-[var(--color-primary-light)]",
+        !noBg && "bg-background border border-primary-light",
         className
       )}
       {...props}
@@ -30,7 +30,7 @@ export const InfoBottomLeft = React.forwardRef<HTMLDivElement, FloatingInfoProps
       ref={ref}
       className={cn(
         "absolute bottom-8 left-8 flex flex-col rounded-lg p-2 max-h-[calc(100%-5em)] overflow-y-auto",
-        !noBg && "bg-[var(--bg-color)] border border-[var(--color-primary-light)]",
+        !noBg && "bg-background border border-primary-light",
         className
       )}
       {...props}
@@ -47,7 +47,7 @@ export const InfoBottomRight = React.forwardRef<HTMLDivElement, FloatingInfoProp
       ref={ref}
       className={cn(
         "absolute bottom-8 right-8 flex flex-col rounded-lg p-2 max-h-[calc(100%-5em)] overflow-y-auto",
-        !noBg && "bg-[var(--bg-color)] border border-[var(--color-primary-light)]",
+        !noBg && "bg-background border border-primary-light",
         className
       )}
       {...props}
@@ -64,7 +64,7 @@ export const InfoTopLeft = React.forwardRef<HTMLDivElement, FloatingInfoProps>(
       ref={ref}
       className={cn(
         "absolute top-14 left-8 flex flex-col rounded-lg p-2 max-h-[calc(100%-5em)] overflow-y-auto",
-        !noBg && "bg-[var(--bg-color)] border border-[var(--color-primary-light)]",
+        !noBg && "bg-background border border-primary-light",
         className
       )}
       {...props}

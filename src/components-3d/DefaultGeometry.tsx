@@ -22,7 +22,7 @@ export default function DefaultGeometry() {
       <Sphere scale={100} args={[1, 32, 32]}>
         <MeshDistortMaterial
           attach="material"
-          color={0x5a8296}
+          color={0xAAAAAA}
           speed={3}
           distort={0.6}
           radius={1}

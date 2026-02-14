@@ -14,54 +14,83 @@ import EditorViewer from "../viewers/EditorViewer";
 import { observer } from "mobx-react";
 
 import useEditorStore from "@/store/useEditorStore";
-import { HeaderButton, HeaderSelect } from "./panes";
+import { HeaderDropdown } from "./panes";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import Loading from "../icons/Loading";
 
 export const VisualizerButtons = observer(() => {
   const store = useEditorStore();
 
+  const dropdownItems = [
+    { value: "-1", label: "All Shapes" },
+    ...store.currentMesh.map((s: any, i: number) => ({
+      value: String(i),
+      label: s.name,
+    })),
+  ];
+
   return (
     <>
       {store.currentMesh.length > 1 && !store.error ? (
         <>
-          <HeaderSelect
-            value={store.ui.shapeIndex}
-            onChange={(e: any) => store.ui.selectShape(parseInt(e.target.value))}
-          >
-            <option value={-1}>All Shapes</option>
-            {store.currentMesh.map((s: any, i: number) => (
-              <option value={i} key={s.name}>
-                {s.name}
-              </option>
-            ))}
-          </HeaderSelect>
+          <HeaderDropdown
+            value={String(store.ui.shapeIndex)}
+            onValueChange={(v) => store.ui.selectShape(parseInt(v))}
+            items={dropdownItems}
+          />
           <div className="flex-1" />
         </>
       ) : null}
 
-      <HeaderButton
-        onClick={() => store.ui.changeDownload(true)}
-        title="Download"
-      >
-        <Download />
-      </HeaderButton>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-[#d4d4d4] hover:bg-white/10 hover:text-white"
+            onClick={() => store.ui.changeDownload(true)}
+          >
+            <Download />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Download</TooltipContent>
+      </Tooltip>
       {!store.ui.currentIsSVG && (
-        <HeaderButton
-          solid={!store.ui.clip.disabled}
-          onClick={() => store.ui.clip.toggle()}
-          title="Clipping plane"
-        >
-          <Clipping />
-        </HeaderButton>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={!store.ui.clip.disabled ? "secondary" : "ghost"}
+              size="icon"
+              className="h-6 w-6 text-[#d4d4d4] hover:bg-white/10 hover:text-white"
+              onClick={() => store.ui.clip.toggle()}
+            >
+              <Clipping />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Clipping plane</TooltipContent>
+        </Tooltip>
       )}
       {store.defaultParams && (
-        <HeaderButton
-          solid={store.ui.enableParams}
-          onClick={() => store.ui.changeEnableParams(!store.ui.enableParams)}
-          title="Parameters"
-        >
-          <Configure />
-        </HeaderButton>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={store.ui.enableParams ? "secondary" : "ghost"}
+              size="icon"
+              className="h-6 w-6 text-[#d4d4d4] hover:bg-white/10 hover:text-white"
+              onClick={() =>
+                store.ui.changeEnableParams(!store.ui.enableParams)
+              }
+            >
+              <Configure />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Parameters</TooltipContent>
+        </Tooltip>
       )}
     </>
   );
@@ -111,7 +140,7 @@ export default observer(function VisualizerPane() {
       )}
 
       {store.shapeLoaded && store.processing && (
-        <InfoBottomLeft noBg className="text-[var(--color-primary-light)]">
+        <InfoBottomLeft noBg className="text-primary-light">
           <Loading size="3em" />
         </InfoBottomLeft>
       )}

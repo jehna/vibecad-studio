@@ -55,7 +55,7 @@ export default observer(function AutoloadButton() {
         </InfoBottomLeft>
       )}
       {!store.error && store.exceptionMode == "withExceptions" && (
-        <InfoBottomLeft className="border-[var(--color-primary-light)] bg-white border-2 z-[1000] max-w-[50vw]">
+        <InfoBottomLeft className="border-primary-light bg-card border-2 z-[1000] max-w-[50vw]">
           <div>
             You are currently in full exception mode. This means that the
             computations are slower but will give you better information about

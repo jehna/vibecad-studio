@@ -8,7 +8,7 @@ export default function Canvas({ children, ...props }: any) {
   return (
     <Suspense fallback={<LoadingScreen />}>
       <ThreeCanvas
-        className="w-full h-full bg-[var(--bg-color)]"
+        className="w-full h-full bg-background"
         dpr={dpr}
         frameloop="demand"
         {...props}
