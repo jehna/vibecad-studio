@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "HKGrotesk";
+  font-weight: 500;
+  src: url("/fonts/HKGrotesk-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "HKGrotesk";
+  font-weight: 300;
+  src: url("/fonts/HKGrotesk-Light.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "HKGrotesk";
+  font-weight: bold;
+  src: url("/fonts/HKGrotesk-Bold.woff2") format("woff2");
+}
+
+@theme inline {
+  --color-background: #f2f3f4;
+  --color-foreground: #444;
+  --color-card: #fff;
+  --color-card-foreground: #444;
+  --color-primary: rgb(90, 130, 150);
+  --color-primary-light: rgb(170, 190, 200);
+  --color-primary-dark: rgb(60, 90, 110);
+  --color-secondary: #d49991;
+  --color-secondary-light: #f2e0de;
+  --color-secondary-dark: #c0695d;
+  --color-muted: #e5e7eb;
+  --color-muted-foreground: #6b7280;
+  --color-border: #ccc;
+  --color-ring: rgb(90, 130, 150);
+  --color-header-primary: rgb(90, 130, 150);
+  --color-header-secondary: rgb(60, 90, 110);
+
+  --font-sans: "HKGrotesk", sans-serif;
+  --radius-sm: 0.2em;
+  --radius-md: 0.4em;
+  --radius-lg: 0.6em;
+}
+
+/* Legacy CSS custom properties for existing components */
+:root {
+  --text-color: #444;
+  --bg-color-secondary: white;
+  --color-primary: rgb(90, 130, 150);
+  --color-primary-light: rgb(170, 190, 200);
+  --color-primary-dark: rgb(60, 90, 110);
+  --color-secondary: #d49991;
+  --color-secondary-light: #f2e0de;
+  --color-secondary-dark: #c0695d;
+  --bg-color: #f2f3f4;
+  --color-header-primary: rgb(90, 130, 150);
+  --color-header-secondary: rgb(60, 90, 110);
+  --color-lines: #ccc;
+}
+
+@media (prefers-color-scheme: dark) {
+  @theme inline {
+    --color-background: #1e1e1e;
+    --color-foreground: #f2f2f2;
+    --color-card: #2e2e2e;
+    --color-card-foreground: #f2f2f2;
+    --color-primary: rgb(122, 176, 204);
+    --color-primary-light: rgb(60, 90, 110);
+    --color-primary-dark: rgb(170, 190, 200);
+    --color-muted: #374151;
+    --color-muted-foreground: #9ca3af;
+    --color-border: #333;
+  }
+
+  :root {
+    --color-primary: rgb(122, 176, 204);
+    --color-primary-light: rgb(60, 90, 110);
+    --color-primary-dark: rgb(170, 190, 200);
+    --bg-color: #1e1e1e;
+    --bg-color-secondary: #2e2e2e;
+    --text-color: #f2f2f2;
+    --color-lines: #333;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 300;
+  overflow-x: hidden;
+  color: var(--text-color);
+  fill: var(--text-color);
+  background-color: white;
+  scroll-behavior: smooth;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  width: 100%;
+  display: flex;
+}
+
+a {
+  color: var(--color-primary);
+}
