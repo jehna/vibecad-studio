@@ -83,6 +83,7 @@ const AppState = types
         );
 
         if (mesh.error) {
+          console.error("[engine] Build failed:", mesh.message, mesh.stack || "");
           self.error = mesh;
         } else {
           self.currentMesh = mesh;

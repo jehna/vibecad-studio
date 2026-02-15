@@ -139,6 +139,16 @@ export default observer(function VisualizerPane() {
         </InfoBottomLeft>
       )}
 
+      {store.hasError && !store.processing && (
+        <InfoBottomLeft className="border-red-500 bg-red-950/90 max-w-[min(400px,50vw)]">
+          <div className="text-red-400 text-xs font-semibold">Error</div>
+          <div className="text-red-200 text-sm mt-1">{store.error?.message}</div>
+          {store.error?.stack && (
+            <pre className="text-red-300/70 text-[10px] mt-2 overflow-x-auto max-h-24 whitespace-pre-wrap">{store.error.stack}</pre>
+          )}
+        </InfoBottomLeft>
+      )}
+
       {store.shapeLoaded && store.processing && (
         <InfoBottomLeft noBg className="text-primary-light">
           <Loading size="3em" />

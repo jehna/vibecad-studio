@@ -94,9 +94,10 @@ const formatException = (oc: any, e: any) => {
     } else {
       message = `Kernel error ${e}`;
     }
+    console.error("[builder.worker] Kernel error:", message);
   } else {
     message = e.message;
-    console.error(e);
+    console.error("[builder.worker] Build error:", e);
   }
 
   return {
