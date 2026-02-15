@@ -10,7 +10,9 @@
     "lint": "eslint",
     "build": "vite build",
     "serve": "vite preview",
-    "start": "vite"
+    "start": "vite",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@devbookhq/splitter": "^1.4.2",
@@ -62,6 +64,7 @@
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
+    "vitest": "^4.0.18",
     "workbox-window": "^7.4.0"
   }
 }

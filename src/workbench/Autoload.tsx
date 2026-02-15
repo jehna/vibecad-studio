@@ -6,6 +6,7 @@ import Reload from "../icons/Reload";
 import useEditorStore from "@/store/useEditorStore";
 import { observer } from "mobx-react";
 import { InfoBottomLeft } from "../components/FloatingInfo";
+import OpenScadDiagnostics from "../components/OpenScadDiagnostics";
 
 export const useAutoload = () => {
   const store = useEditorStore();
@@ -45,6 +46,13 @@ export default observer(function AutoloadButton() {
         <InfoBottomLeft className="border-red-500 bg-white border-2 z-[1000] max-w-[50vw] [&>:first-child]:text-red-500 [&>:nth-child(2)]:text-lg [&>pre]:text-xs [&>pre]:overflow-x-auto [&>pre]:p-4 [&>pre]:bg-[#f2e0de]">
           <div>Error</div>
           <div>{store.error?.message}</div>
+          {store.error.diagnostics ? (
+            <OpenScadDiagnostics
+              summary={store.error.message}
+              details={store.error.diagnostics}
+              scadSource={store.error.scadSource}
+            />
+          ) : null}
           {store.error.stack && <pre>{store.error.stack}</pre>}
 
           <div className="flex justify-end">

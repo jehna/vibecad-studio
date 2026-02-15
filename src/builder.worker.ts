@@ -6,6 +6,14 @@ import initOpenCascadeWithExceptions from "./initOCWithExceptions";
 import { StudioHelper } from "./utils/StudioHelper";
 
 import { renderOutput, ShapeStandardizer } from "./utils/renderOutput";
+import { parseStlBinary, validateMesh, computeBoundingBox } from "./openscad/stl-parser";
+import { compileScadToStl } from "./openscad/wasm-compiler";
+import {
+  createDiagnosticsReport,
+  formatDiagnosticsForConsole,
+  formatDiagnosticsForUI,
+} from "./openscad/diagnostics";
+import type { GenerateScadResult, DiagnosticsReport } from "./openscad/types";
 
 (self as any).replicad = replicad;
 
@@ -106,7 +114,110 @@ const formatException = (oc: any, e: any) => {
   };
 };
 
-const buildShapesFromModel = async (slug: string, params?: any) => {
+// Store the latest diagnostics report for the UI
+let lastDiagnosticsReport: DiagnosticsReport | null = null;
+
+/**
+ * Build shapes from an OpenSCAD model:
+ * generateScad() → SCAD source → WASM compile → STL → parsed mesh
+ */
+const buildShapesFromOpenScad = async (slug: string, mod: any, params: any) => {
+  let result: GenerateScadResult;
+  try {
+    result = mod.generateScad(params);
+  } catch (e: any) {
+    const message = e?.message || String(e);
+    console.error(`[OpenSCAD] Generator error for "${slug}":`, e);
+    return {
+      error: true,
+      message: `SCAD generator error: ${message}`,
+      stack: e?.stack,
+    };
+  }
+
+  const { scad, manifest, sourceMap } = result;
+  console.log(`[OpenSCAD] Generated SCAD for "${slug}" (${scad.length} chars)`);
+
+  // Compile SCAD → STL via WASM
+  const compileResult = await compileScadToStl(scad);
+
+  if (!compileResult.ok) {
+    const report = createDiagnosticsReport(
+      slug,
+      compileResult.error,
+      scad,
+      false,
+      sourceMap
+    );
+    lastDiagnosticsReport = report;
+
+    // Log diagnostics to console
+    console.error(formatDiagnosticsForConsole(report));
+
+    const uiInfo = formatDiagnosticsForUI(report);
+    return {
+      error: true,
+      message: uiInfo.summary,
+      diagnostics: uiInfo.details,
+      scadSource: scad,
+      stack: typeof compileResult.raw === 'object' && compileResult.raw !== null && 'stack' in (compileResult.raw as any)
+        ? (compileResult.raw as any).stack
+        : undefined,
+    };
+  }
+
+  // Parse the STL binary into mesh data
+  let mesh;
+  try {
+    mesh = parseStlBinary(compileResult.stl.buffer);
+  } catch (e: any) {
+    console.error(`[OpenSCAD] STL parse error for "${slug}":`, e);
+    return {
+      error: true,
+      message: `Failed to parse compiled STL: ${e.message}`,
+      stack: e.stack,
+    };
+  }
+
+  // Validate the mesh
+  const issues = validateMesh(mesh);
+  if (issues.length > 0) {
+    console.warn(`[OpenSCAD] Mesh validation warnings for "${slug}":`, issues);
+  }
+
+  const bbox = computeBoundingBox(mesh);
+  console.log(
+    `[OpenSCAD] Compiled "${slug}": ${mesh.triangleCount} triangles, ` +
+    `bbox [${bbox.min.map((n: number) => n.toFixed(1)).join(",")}] → [${bbox.max.map((n: number) => n.toFixed(1)).join(",")}]`
+  );
+
+  // Create a success diagnostics report
+  const report = createDiagnosticsReport(slug, "", scad, true, sourceMap);
+  lastDiagnosticsReport = report;
+
+  // Store STL data for export
+  SHAPES_MEMORY.defaultShape = [{ stlData: compileResult.stl, name: slug }];
+
+  // Return mesh in STL format that the viewer can render
+  return [
+    {
+      name: manifest?.model || slug,
+      format: "stl",
+      vertices: mesh.vertices,
+      normals: mesh.normals,
+      triangleCount: mesh.triangleCount,
+      color: undefined,
+      opacity: undefined,
+      labels: [],
+      error: false,
+    },
+  ];
+};
+
+/**
+ * Build shapes from a replicad model (existing pipeline).
+ */
+const buildShapesFromReplicad = async (slug: string, mod: any, params: any) => {
   const oc = await OC;
   (replicad as any).setOC(oc);
   if (!(replicad as any).getFont())
@@ -121,11 +232,10 @@ const buildShapesFromModel = async (slug: string, params?: any) => {
     (self as any).registerShapeStandardizer =
       standardizer.registerAdapter.bind(standardizer);
 
-    const mod = await loadModel(slug);
     const effectiveParams = params || mod.defaultParams || {};
     shapes = await mod.main(effectiveParams);
   } catch (e) {
-    return formatException(oc, e);
+    return formatException(await OC, e);
   }
 
   return renderOutput(
@@ -137,6 +247,19 @@ const buildShapesFromModel = async (slug: string, params?: any) => {
       return editedShapes;
     }
   );
+};
+
+const buildShapesFromModel = async (slug: string, params?: any) => {
+  const mod = await loadModel(slug);
+  const effectiveParams = params || mod.defaultParams || {};
+
+  // Detect model type: OpenSCAD models export generateScad()
+  if (typeof mod.generateScad === "function") {
+    return buildShapesFromOpenScad(slug, mod, effectiveParams);
+  }
+
+  // Default: replicad pipeline
+  return buildShapesFromReplicad(slug, mod, effectiveParams);
 };
 
 const buildBlob = (
@@ -202,6 +325,11 @@ const edgeInfo = (subshapeIndex: number, edgeIndex: number, shapeId = "defaultSh
   };
 };
 
+const getOpenScadDiagnostics = () => {
+  if (!lastDiagnosticsReport) return null;
+  return formatDiagnosticsForUI(lastDiagnosticsReport);
+};
+
 const service = {
   ready: () => OC.then(() => true),
   buildShapesFromModel,
@@ -213,6 +341,7 @@ const service = {
   faceInfo,
   toggleExceptions,
   exceptionsEnabled: () => ocVersions.current === "withExceptions",
+  getOpenScadDiagnostics,
 };
 
 expose(service, self);

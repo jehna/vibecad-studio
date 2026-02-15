@@ -11,6 +11,7 @@ import {
   ReplicadFacesMesh,
   ReplicadEdgesMesh,
 } from "./replicadMesh";
+import { StlFacesMesh, StlEdgesMesh } from "./StlMesh";
 
 const colorVariants = (baseColor = "#8B9DC3") => {
   return {
@@ -47,6 +48,55 @@ const ShapeGeometry = ({
     return plane;
   }, [clipDirection, clipConstant]);
 
+  // STL-format shapes (from OpenSCAD pipeline)
+  if (shape.format === "stl") {
+    return (
+      <>
+        {(shape.labels ?? []).map(
+          ({ from, to, offset, color, label, fontSize, mode, position }: any) => (
+            <Label3D
+              key={label}
+              start={from}
+              end={to}
+              offset={offset}
+              lineColor={color}
+              text={label}
+              lineMode={mode}
+              fontSize={fontSize}
+              position={position}
+            />
+          )
+        )}
+        <ClipPlane sideColor={colors.sideColor} clippingPlane={clippingPlane}>
+          {FaceMaterial && (
+            <StlFacesMesh vertices={shape.vertices} normals={shape.normals}>
+              <FaceMaterial
+                attach="material"
+                transparent={transparent}
+                opacity={shape.opacity}
+                color={colors.base}
+                polygonOffset
+                polygonOffsetFactor={2.0}
+                polygonOffsetUnits={1.0}
+              />
+            </StlFacesMesh>
+          )}
+          {LineMaterial && (
+            <StlEdgesMesh vertices={shape.vertices}>
+              <LineMaterial
+                attach="material"
+                transparent={transparent}
+                opacity={shape.opacity}
+                color={colors.line}
+              />
+            </StlEdgesMesh>
+          )}
+        </ClipPlane>
+      </>
+    );
+  }
+
+  // Replicad-format shapes (default pipeline)
   return (
     <>
       {(shape.labels ?? []).map(
