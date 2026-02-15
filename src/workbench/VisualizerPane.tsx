@@ -10,6 +10,7 @@ import DownloadDialog from "./DownloadDialog";
 import ParamsEditor from "./ParamsEditor";
 import LoadingScreen from "../components/LoadingScreen";
 import EditorViewer from "../viewers/EditorViewer";
+import OpenScadDiagnostics from "../components/OpenScadDiagnostics";
 
 import { observer } from "mobx-react";
 
@@ -136,6 +137,25 @@ export default observer(function VisualizerPane() {
         <InfoBottomLeft>
           <FaceInfo />
           <EdgeInfo />
+        </InfoBottomLeft>
+      )}
+
+      {store.error && (
+        <InfoBottomLeft className="border-red-500 bg-white dark:bg-gray-900 border-2 z-[1000] max-w-[50vw]">
+          <div className="text-red-500 font-semibold text-sm">Error</div>
+          <div className="text-sm">{store.error?.message}</div>
+          {store.error.diagnostics ? (
+            <OpenScadDiagnostics
+              summary={store.error.message}
+              details={store.error.diagnostics}
+              scadSource={store.error.scadSource}
+            />
+          ) : null}
+          {store.error.stack && (
+            <pre className="text-xs overflow-x-auto p-2 bg-red-50 dark:bg-red-950 rounded mt-1">
+              {store.error.stack}
+            </pre>
+          )}
         </InfoBottomLeft>
       )}
 
