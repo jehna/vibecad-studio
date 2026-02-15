@@ -1,224 +1,172 @@
 ---
 name: vibe-model
-description: Create or modify parametric 3D models for VibeCad Studio using the replicad CAD library. Use when the user wants to create a new model, modify geometry or parameters, or understand how a model works.
-allowed-tools: Read, Grep, Glob, Write, Edit, Bash(npx tsc --noEmit), Bash(mkdir -p src/models/*)
+description: Create or modify parametric 3D models for VibeCad Studio using OpenSCAD. Use when the user wants to create a new model, modify geometry or parameters, or understand how a model works.
+allowed-tools: Read, Grep, Glob, Write, Edit, Bash(node scripts/verify-model.js *), Bash(mkdir -p src/models/*)
 ---
 
 # VibeCad Model Author
 
-Create or modify parametric 3D models for VibeCad Studio using the replicad CAD library.
+Create or modify parametric 3D models for VibeCad Studio using OpenSCAD.
 
 ## Project Context
 
-VibeCad Studio is a browser-based parametric CAD workbench. Models are written in TypeScript using the **replicad** library (v0.20.5), which wraps OpenCASCADE via WebAssembly. Models are auto-discovered — no manual registration needed.
+VibeCad Studio is a browser-based parametric CAD workbench. Models are written in **OpenSCAD** (.scad files) and compiled to STL via openscad-wasm. Models are auto-discovered — no manual registration needed.
 
 ## Model File Structure
 
-Each model lives in `src/models/<slug>/` with exactly two files:
+Each model lives in `src/models/<slug>/` with a single file:
 
-### 1. `src/models/<slug>/index.ts` — Metadata
+### `src/models/<slug>/model.scad`
 
-```typescript
-import type { ModelDefinition } from "../types";
+```scad
+// Description shown on the home page gallery
+length = 40; // [10:100]
+width = 30;  // [5:80]
+height = 20; // [5:60]
 
-const model: ModelDefinition = {
-  name: "Human Readable Name",
-  description: "Brief description for the gallery",
-  slug: "kebab-case-slug", // Must match the folder name
-};
-
-export default model;
+cube([length, width, height]);
 ```
 
-### 2. `src/models/<slug>/model.ts` — CAD Implementation
-
-```typescript
-import { draw } from "replicad";
-
-export const defaultParams = {
-  width: 50,
-  height: 30,
-};
-
-export function main(params: typeof defaultParams) {
-  const { width, height } = params;
-
-  // Build and return replicad shape(s)
-  return draw()
-    .hLine(width)
-    .vLine(height)
-    .hLine(-width)
-    .close()
-    .sketchOnPlane("XY")
-    .extrude(10);
-}
-```
-
-**Required exports from model.ts:**
-- `defaultParams` — object with numeric parameter values (these become UI sliders)
-- `main(params)` — function returning a shape, array of shapes, or array of `{ shape, name?, color?, opacity? }`
+**Conventions:**
+- **First line**: `// comment` becomes the model description for the gallery
+- **Parameters**: `name = value; // [min:max]` or `name = value; // [min:step:max]` become UI sliders
+- The folder name becomes the slug, which is auto-converted to a display name (`example-box` → `Example Box`)
 
 ## Key Conventions
 
-- The `slug` in index.ts **must** match the folder name
-- Parameter names should be camelCase and descriptive (e.g. `wallThickness`, not `wt`)
+- Parameter names should be `snake_case` and descriptive (e.g. `wall_thickness`, not `wt`)
 - All parameter values are numbers
-- Type the main function param as `typeof defaultParams`
-- Destructure params at the top of `main()`
-- Helper functions can be defined in model.ts above `main()`
-- Use `type` keyword for replicad type imports: `import { draw, type Solid } from "replicad"`
-- Some replicad types are incomplete — use type assertions (`as Solid`, `as unknown as { wire: Wire }`) when needed
+- Use `$fn` for controlling curve resolution (32 is a good default)
+- Keep models manifold (watertight) for 3D printing compatibility
 
-## Return Values
-
-`main()` can return:
-- A single shape (most common)
-- An array of shapes (rendered as separate objects)
-- An array of `{ shape, name?, color?, opacity?, labels? }` for named/colored multi-part models
-
-## replicad API Quick Reference
-
-### Drawing 2D Profiles (most common starting point)
-
-```typescript
-import { draw, drawCircle, drawRoundedRectangle, drawPolysides } from "replicad";
-
-// Pen-style 2D drawing (returns Drawing)
-draw()                          // start at origin
-draw([x, y])                    // start at point
-  .hLine(length)                // horizontal line
-  .vLine(length)                // vertical line
-  .line(dx, dy)                 // relative line
-  .lineTo([x, y])              // absolute line
-  .hBulgeArc(length, bulge)    // horizontal bulge arc
-  .vBulgeArc(length, bulge)    // vertical bulge arc
-  .smoothSplineTo([x, y], { endTangent?, startTangent?, startFactor?, endFactor? })
-  .close()                      // close and return Drawing
-  .done()                       // leave open, return Drawing
-  .translate([dx, dy])          // translate 2D
-
-// Shorthand shapes
-drawCircle(radius)
-drawRoundedRectangle(width, height, radius?)
-drawPolysides(radius, sidesCount, sagitta?)
-```
-
-### From 2D to 3D
-
-```typescript
-// Drawing → Sketch (positioned in 3D)
-drawing.sketchOnPlane(plane, origin?)
-// plane: "XY" | "YZ" | "XZ" | "XZ" | number | [x,y,z]
-// origin: number (offset) or [x,y,z]
-
-// Sketch → 3D Shape
-sketch.extrude(height)
-sketch.revolve(angle?)           // revolve around axis
-sketch.loftWith(otherSketches)
-
-// Direct sketch helpers
-import { sketchCircle, sketchRectangle, sketchRoundedRectangle } from "replicad";
-sketchCircle(radius, { plane?, origin? })
-sketchRectangle(width, height, { plane?, origin? })
-```
+## OpenSCAD Quick Reference
 
 ### 3D Primitives
 
-```typescript
-import { makeBox, makeCylinder, makeSphere, makeEllipsoid } from "replicad";
-
-makeBox([x1,y1,z1], [x2,y2,z2])
-makeCylinder(radius, height, location?, direction?)
-makeSphere(radius)
-makeEllipsoid(a, b, c)
+```scad
+cube([x, y, z]);                    // box
+cube([x, y, z], center=true);       // centered box
+sphere(r=radius, $fn=64);           // sphere
+cylinder(h=height, r=radius, $fn=32); // cylinder
+cylinder(h=height, r1=bot, r2=top, $fn=32); // cone/frustum
 ```
 
-### Boolean Operations (on 3D shapes)
+### 2D Primitives (for extrusion)
 
-```typescript
-shape.fuse(other)       // union
-shape.cut(tool)         // subtraction
-shape.intersect(tool)   // intersection
+```scad
+square([w, h]);
+square([w, h], center=true);
+circle(r=radius, $fn=64);
+polygon(points=[[x1,y1], [x2,y2], ...]);
+text("hello", size=10);
 ```
 
-### Shape Modifications
+### Transformations
 
-```typescript
-shape.fillet(radius)                              // fillet all edges
-shape.fillet(radius, (e) => e.inPlane("XY", z))  // fillet filtered edges
-shape.chamfer(radius)                             // chamfer edges
-shape.shell(thickness, (f) => f.containsPoint([x,y,z]))  // hollow out
-shape.translate([dx, dy, dz])
-shape.rotate(angleDeg, center?, axis?)
-shape.mirror(plane)                               // e.g. "YZ", "XY"
-shape.clone()
+```scad
+translate([x, y, z]) { ... }
+rotate([rx, ry, rz]) { ... }        // degrees
+scale([sx, sy, sz]) { ... }
+mirror([x, y, z]) { ... }
+color("red") { ... }
+color([r, g, b, a]) { ... }
 ```
 
-### Edge Finders (for fillet/chamfer filtering)
+### Boolean Operations
 
-```typescript
-(e) => e.inPlane("XY", height)        // edges in a plane
-(e) => e.inDirection("Z")             // edges along direction
-(e) => e.withinDistance(dist, point)   // edges near a point
-(e) => e.containsPoint([x,y,z])       // edges through a point
-// Chain multiple: e.inPlane("XY").inDirection("X")
+```scad
+union() { a(); b(); }               // combine shapes
+difference() { a(); b(); }          // subtract b from a
+intersection() { a(); b(); }        // keep overlap only
 ```
 
-### Face Finders (for shell filtering)
+### Extrusions
 
-```typescript
-(f) => f.containsPoint([x,y,z])
-(f) => f.inPlane("XY", height)
-(f) => f.inDirection("Z")
+```scad
+linear_extrude(height=h, twist=deg, scale=s) { 2d_shape(); }
+rotate_extrude(angle=360, $fn=64) { 2d_profile(); }
 ```
 
-### Advanced Operations
+### Hull & Minkowski
 
-```typescript
-import { loft, genericSweep, assembleWire } from "replicad";
+```scad
+hull() { a(); b(); }                // convex hull
+minkowski() { a(); b(); }           // Minkowski sum (rounding)
+```
 
-// Loft between wire profiles
-loft([wire1, wire2, wire3], { ruled?: boolean })
+### Modules (reusable components)
 
-// Sweep a profile along a spine
-genericSweep(sectionWire, spineWire, { frenet: true }, false)
+```scad
+module rounded_box(size, radius) {
+    minkowski() {
+        cube([size[0]-2*radius, size[1]-2*radius, size[2]/2]);
+        cylinder(r=radius, h=size[2]/2, $fn=32);
+    }
+}
 
-// Combine edges/wires into one wire
-assembleWire([edge1, edge2, wire1])
+rounded_box([40, 30, 20], 3);
+```
+
+### Loops & Conditionals
+
+```scad
+for (i = [0:5]) { translate([i*10, 0, 0]) cube(5); }
+for (a = [0:60:300]) { rotate([0, 0, a]) translate([20, 0, 0]) sphere(3); }
+if (wall > 0) { difference() { outer(); inner(); } }
+```
+
+### Useful Patterns
+
+```scad
+// Hollow box (shell)
+difference() {
+    cube([outer_w, outer_d, outer_h]);
+    translate([wall, wall, wall])
+        cube([outer_w - 2*wall, outer_d - 2*wall, outer_h]);
+}
+
+// Rounded edges via minkowski
+minkowski() {
+    cube([w - 2*r, d - 2*r, h/2]);
+    cylinder(r=r, h=h/2, $fn=32);
+}
+
+// Circular pattern
+for (i = [0:n-1]) {
+    rotate([0, 0, i * 360/n])
+        translate([radius, 0, 0])
+            child_shape();
+}
 ```
 
 ## Workflow
 
 When creating a **new** model:
 
-1. Read `src/models/types.ts` to confirm the ModelDefinition interface
-2. Read 1-2 existing models for reference patterns (especially one with similar geometry)
-3. Create the folder: `src/models/<slug>/`
-4. Write `src/models/<slug>/index.ts` with metadata
-5. Write `src/models/<slug>/model.ts` with defaultParams and main()
-6. Run `npx tsc --noEmit` to type-check
+1. Read 1-2 existing models for reference patterns
+2. Create the folder: `mkdir -p src/models/<slug>/`
+3. Write `src/models/<slug>/model.scad`
+4. Run `node scripts/verify-model.js src/models/<slug>/model.scad` to verify
+5. If errors, fix and re-run until exit code 0
 
 When **modifying** an existing model:
 
-1. Read the current model.ts and index.ts
+1. Read the current model.scad
 2. Make the requested changes
-3. Run `npx tsc --noEmit` to type-check
+3. Run `node scripts/verify-model.js src/models/<slug>/model.scad` to verify
 
 ## Tips
 
-- Start simple, iterate. A basic extruded rectangle is better than a broken complex shape.
-- For organic shapes, use `smoothSplineTo` with tangent control.
-- For mechanical parts, boolean operations (fuse/cut) with primitives work well.
-- `shell()` is great for hollow objects (vases, containers, enclosures).
-- `fillet()` rounds edges — apply after boolean operations, not before.
-- When lofting, all wires must have the same number of edges.
-- Use `.clone()` before `.fuse()` if you need the original shape later.
+- Start simple, iterate. A basic cube is better than a broken complex shape.
+- OpenSCAD error messages include line numbers — use them to pinpoint issues.
+- `minkowski()` is expensive — use it sparingly and with low-poly shapes.
+- `$fn` controls facet count: higher = smoother but slower. 32 for cylinders, 64 for spheres.
+- `difference()` subtracts all children after the first from the first child.
+- Use `center=true` on primitives to simplify positioning.
 - The dev server supports HMR — model changes appear live in the browser.
 
 ## Existing Models for Reference
 
 | Model | Slug | Techniques |
 |---|---|---|
-| Example Vase | `example-vase` | draw + smoothSpline, revolve, shell, fillet |
-| Plant Light Holder | `plant-light-holder` | loft between U-profiles, boolean fuse/cut/intersect |
-| Ski Holder | `ski-holder` | genericSweep with Frenet frame, mirror, fillet with edge finders |
+| Example Box | `example-box` | minkowski rounding, difference for hollow interior, parametric dimensions |

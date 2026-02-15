@@ -1,4 +1,4 @@
-import { types, getRoot } from "mobx-state-tree";
+import { types } from "mobx-state-tree";
 
 const ClipConfig = types.optional(
   types
@@ -39,41 +39,10 @@ const ClipConfig = types.optional(
 export default types.optional(
   types
     .model("UIState", {
-      shapeSelection: types.optional(types.number, -1),
-      highlightedFaceIndex: types.maybe(types.maybeNull(types.number)),
-      highlightedEdgeIndex: types.maybe(types.maybeNull(types.number)),
       clip: ClipConfig,
       showDownload: types.optional(types.boolean, false),
       enableParams: types.optional(types.boolean, false),
     })
-    .views((self) => ({
-      get singleShape() {
-        const store: any = getRoot(self);
-        return store.currentMesh.length === 1;
-      },
-
-      get shapeIndex() {
-        const store: any = getRoot(self);
-        if (store.errors) return -1;
-        if (self.singleShape) return 0;
-        if (self.shapeSelection > store.currentMesh.length) return -1;
-        return self.shapeSelection;
-      },
-      get shapeSelected() {
-        const store: any = getRoot(self);
-        if (self.shapeIndex === -1) return store.currentMesh;
-        return store.currentMesh[self.shapeIndex];
-      },
-
-      get currentIsSVG() {
-        const shape: any = self.shapeSelected;
-        return (
-          shape &&
-          (shape.format === "svg" ||
-            (shape.length && shape[0].format === "svg"))
-        );
-      },
-    }))
     .actions((self) => {
       return {
         changeDownload(newValue: boolean) {
@@ -81,18 +50,6 @@ export default types.optional(
         },
         changeEnableParams(newValue: boolean) {
           self.enableParams = newValue;
-        },
-        changeHighlight(faceIndex: number | null, edgeIndex: number | null) {
-          self.highlightedFaceIndex = faceIndex;
-          self.highlightedEdgeIndex = edgeIndex;
-        },
-        deHighlight() {
-          self.highlightedFaceIndex = null;
-          self.highlightedEdgeIndex = null;
-        },
-        selectShape(newSelection: number) {
-          self.shapeSelection = newSelection;
-          self.deHighlight();
         },
       };
     }),

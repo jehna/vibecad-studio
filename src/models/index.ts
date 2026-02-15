@@ -1,14 +1,37 @@
-import type { ModelDefinition } from "./types";
+import { parseScad, slugToName } from "@/utils/scadParser";
 
-const modelModules = import.meta.glob<{ default: ModelDefinition }>(
-  "./*/index.ts",
-  { eager: true }
-);
+const scadModules = import.meta.glob<string>("./*/model.scad", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
 
-export function getModels(): ModelDefinition[] {
-  return Object.values(modelModules).map((mod) => mod.default);
+export interface ModelEntry {
+  slug: string;
+  name: string;
+  description: string;
+  source: string;
 }
 
-export function getModelBySlug(slug: string): ModelDefinition | undefined {
-  return getModels().find((m) => m.slug === slug);
+function buildModels(): ModelEntry[] {
+  return Object.entries(scadModules).map(([path, source]) => {
+    const slug = path.match(/\.\/([^/]+)\//)?.[1] ?? "unknown";
+    const parsed = parseScad(source);
+    return {
+      slug,
+      name: slugToName(slug),
+      description: parsed.description,
+      source,
+    };
+  });
+}
+
+const models = buildModels();
+
+export function getModels(): { slug: string; name: string; description: string }[] {
+  return models.map(({ slug, name, description }) => ({ slug, name, description }));
+}
+
+export function getModelSource(slug: string): string | undefined {
+  return models.find((m) => m.slug === slug)?.source;
 }

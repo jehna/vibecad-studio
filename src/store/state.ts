@@ -1,10 +1,11 @@
 import { types, flow, getSnapshot } from "mobx-state-tree";
 import { autorun } from "mobx";
 
-import api from "@/utils/builderAPI";
+import api from "@/utils/openscadAPI";
+import { getModelSource } from "@/models";
+import { parseScad } from "@/utils/scadParser";
 import UIState from "./ui-state";
 import CodeState from "./code-state";
-import SelectedInfo from "./selected-info";
 
 const inSeries = (func: () => Promise<void>) => {
   let refresh: boolean;
@@ -33,7 +34,6 @@ const AppState = types
   .model("AppState", {
     ui: UIState,
     code: CodeState,
-    selectedInfo: SelectedInfo,
     config: types.optional(
       types.model({
         modelSlug: types.optional(types.string, ""),
@@ -46,61 +46,76 @@ const AppState = types
       return getSnapshot(self.config);
     },
     get hasError() {
-      return !!(self as any).error?.error;
+      return (self as any).errors.length > 0;
     },
-
     get modelInitialized() {
       return !!self.config.modelSlug;
     },
   }))
   .volatile(() => ({
     defaultParams: null as any,
-    currentMesh: [] as any[],
+    currentMesh: null as { stl: Uint8Array } | null,
     processing: false,
     shapeLoaded: false,
-    error: false as any,
-    faceInfo: null as any,
-    processingInfo: null as any,
-    exceptionMode: "single",
-    currentLabels: [] as any[],
+    logs: [] as string[],
+    errors: [] as string[],
+    scadSource: "",
   }))
   .actions((self) => ({
     initModel(slug: string) {
       self.config.modelSlug = slug;
+      const source = getModelSource(slug);
+      if (source) {
+        self.scadSource = source;
+        const parsed = parseScad(source);
+        const levaParams: Record<string, any> = {};
+        for (const p of parsed.params) {
+          levaParams[p.name] = {
+            value: p.value,
+            min: p.min,
+            max: p.max,
+            step: p.step,
+          };
+        }
+        self.defaultParams = Object.keys(levaParams).length > 0 ? levaParams : null;
+      }
     },
 
-    toggleExceptions: flow(function* toggleExceptions() {
-      self.exceptionMode = yield api.toggleExceptions();
-    }),
+    updateSource(source: string) {
+      self.scadSource = source;
+      const parsed = parseScad(source);
+      const levaParams: Record<string, any> = {};
+      for (const p of parsed.params) {
+        levaParams[p.name] = {
+          value: p.value,
+          min: p.min,
+          max: p.max,
+          step: p.step,
+        };
+      }
+      self.defaultParams = Object.keys(levaParams).length > 0 ? levaParams : null;
+    },
 
-    process: flow(function* process(params?: any) {
-      self.ui.deHighlight();
+    process: flow(function* process(params?: Record<string, number>) {
+      if (!self.scadSource) return;
       self.processing = true;
-      try {
-        const mesh = yield api.buildShapesFromModel(
-          self.currentValues.modelSlug,
-          params
-        );
 
-        if (mesh.error) {
-          self.error = mesh;
+      try {
+        const result = yield api.render(self.scadSource, params || {});
+
+        self.logs = result.logs;
+        self.errors = result.errors;
+
+        if (result.stl) {
+          self.currentMesh = { stl: result.stl };
         } else {
-          self.currentMesh = mesh;
-          self.error = false;
+          self.currentMesh = null;
         }
 
         self.shapeLoaded = true;
       } catch (e) {
         console.error(e);
-        self.error = e;
-      }
-
-      try {
-        self.defaultParams = yield api.getDefaultParams(
-          self.currentValues.modelSlug
-        );
-      } catch (e) {
-        console.log("no default params");
+        self.errors = [String(e)];
       }
 
       self.processing = false;
@@ -113,7 +128,6 @@ const AppState = types
 
     const run = async () => {
       if (!self.currentValues.modelSlug) return;
-      self.exceptionMode;
       await processor();
     };
 

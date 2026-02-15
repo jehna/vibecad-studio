@@ -4,17 +4,17 @@ import Configure from "../icons/Configure";
 import Clipping from "../icons/Clipping";
 import Download from "../icons/Download";
 import ClippingParams from "./ClippingParams";
-import { FaceInfo, EdgeInfo } from "./HighlightedInfo";
-import { InfoBottomLeft, InfoTopRight } from "../components/FloatingInfo";
+import { InfoTopRight } from "../components/FloatingInfo";
+import { InfoBottomLeft } from "../components/FloatingInfo";
 import DownloadDialog from "./DownloadDialog";
 import ParamsEditor from "./ParamsEditor";
 import LoadingScreen from "../components/LoadingScreen";
 import EditorViewer from "../viewers/EditorViewer";
+import ErrorPanel from "../components/ErrorPanel";
 
 import { observer } from "mobx-react";
 
 import useEditorStore from "@/store/useEditorStore";
-import { HeaderDropdown } from "./panes";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -26,27 +26,8 @@ import Loading from "../icons/Loading";
 export const VisualizerButtons = observer(() => {
   const store = useEditorStore();
 
-  const dropdownItems = [
-    { value: "-1", label: "All Shapes" },
-    ...store.currentMesh.map((s: any, i: number) => ({
-      value: String(i),
-      label: s.name,
-    })),
-  ];
-
   return (
     <>
-      {store.currentMesh.length > 1 && !store.error ? (
-        <>
-          <HeaderDropdown
-            value={String(store.ui.shapeIndex)}
-            onValueChange={(v) => store.ui.selectShape(parseInt(v))}
-            items={dropdownItems}
-          />
-          <div className="flex-1" />
-        </>
-      ) : null}
-
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -60,21 +41,19 @@ export const VisualizerButtons = observer(() => {
         </TooltipTrigger>
         <TooltipContent>Download</TooltipContent>
       </Tooltip>
-      {!store.ui.currentIsSVG && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant={!store.ui.clip.disabled ? "secondary" : "ghost"}
-              size="icon"
-              className="h-6 w-6 text-[#d4d4d4] hover:bg-white/10 hover:text-white"
-              onClick={() => store.ui.clip.toggle()}
-            >
-              <Clipping />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Clipping plane</TooltipContent>
-        </Tooltip>
-      )}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant={!store.ui.clip.disabled ? "secondary" : "ghost"}
+            size="icon"
+            className="h-6 w-6 text-[#d4d4d4] hover:bg-white/10 hover:text-white"
+            onClick={() => store.ui.clip.toggle()}
+          >
+            <Clipping />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Clipping plane</TooltipContent>
+      </Tooltip>
       {store.defaultParams && (
         <Tooltip>
           <TooltipTrigger asChild>
@@ -99,18 +78,14 @@ export const VisualizerButtons = observer(() => {
 export default observer(function VisualizerPane() {
   const store = useEditorStore();
 
-  const shape = store.ui.shapeSelected;
-
   return (
     <>
       {store.shapeLoaded ? (
         <EditorViewer
-          shape={shape}
-          labels={store.currentLabels}
+          stl={store.currentMesh?.stl ?? null}
           hasError={store.hasError}
           clipDirection={store.ui.clip.planeVector}
           clipConstant={store.ui.clip.position}
-          onSelected={store.ui.changeHighlight}
         />
       ) : (
         <LoadingScreen />
@@ -131,13 +106,7 @@ export default observer(function VisualizerPane() {
         <DownloadDialog onClose={() => store.ui.changeDownload(false)} />
       )}
 
-      {(store.selectedInfo.faceInitialized ||
-        store.selectedInfo.edgeInitialized) && (
-        <InfoBottomLeft>
-          <FaceInfo />
-          <EdgeInfo />
-        </InfoBottomLeft>
-      )}
+      <ErrorPanel />
 
       {store.shapeLoaded && store.processing && (
         <InfoBottomLeft noBg className="text-primary-light">

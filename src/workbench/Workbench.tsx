@@ -6,8 +6,6 @@ import useEditorStore, {
   EditorContextProvider,
 } from "@/store/useEditorStore";
 
-import api from "@/utils/builderAPI";
-
 import { Pane } from "./panes";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -23,15 +21,19 @@ export const WorkbenchStructure = observer(function WorkbenchStructure() {
     }
   }, [store, modelSlug]);
 
-  // HMR: when model files change in dev, reload the model in the worker
+  // HMR: when .scad files change in dev, re-import raw source and re-render
   useEffect(() => {
     if (!modelSlug || !import.meta.hot) return;
 
-    const handler = (data: { slug: string }) => {
+    const handler = async (data: { slug: string }) => {
       if (data.slug === modelSlug) {
-        api.reloadModel(modelSlug).then(() => {
-          store.process();
-        });
+        // Re-import the raw .scad source with cache-busting
+        const mod = await import(
+          /* @vite-ignore */
+          `../models/${modelSlug}/model.scad?raw&t=${Date.now()}`
+        );
+        store.updateSource(mod.default);
+        store.process();
       }
     };
 

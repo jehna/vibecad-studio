@@ -11,7 +11,7 @@ function modelHmrPlugin(): Plugin {
     handleHotUpdate(ctx) {
       if (
         ctx.file.includes("/models/") &&
-        ctx.file.endsWith("model.ts")
+        ctx.file.endsWith("model.scad")
       ) {
         const slug = ctx.file.match(/\/models\/([^/]+)\//)?.[1];
         ctx.server.ws.send({
@@ -96,7 +96,7 @@ export default defineConfig({
   worker: {
     format: "es",
   },
-  optimizeDeps: { exclude: ["replicad"] },
+  optimizeDeps: {},
   build: {
     outDir: "dist",
   },
