@@ -7,7 +7,9 @@ grid_unit = 42; // [40:0.5:44]
 chamfer_top = 2.15;
 wall_section = 1.8;
 chamfer_bottom = 0.7;
-corner_radius = 4;
+corner_r_top = 7.5 / 2;    // 3.75mm — top opening
+corner_r_mid = 3.2 / 2;    // 1.6mm  — vertical wall
+corner_r_bot = 1.6 / 2;    // 0.8mm  — bottom
 
 /* Derived dimensions */
 total_height = chamfer_top + wall_section + chamfer_bottom;
@@ -37,32 +39,32 @@ module pocket() {
     hull() {
         translate([0, 0, z0])
             linear_extrude(0.01)
-                rounded_square(bottom_width, corner_radius);
+                rounded_square(bottom_width, corner_r_bot);
         translate([0, 0, z1])
             linear_extrude(0.01)
-                rounded_square(inner_width, corner_radius);
+                rounded_square(inner_width, corner_r_mid);
     }
 
     // Vertical wall
     translate([0, 0, z1])
         linear_extrude(wall_section)
-            rounded_square(inner_width, corner_radius);
+            rounded_square(inner_width, corner_r_mid);
 
     // Top chamfer
     hull() {
         translate([0, 0, z2])
             linear_extrude(0.01)
-                rounded_square(inner_width, corner_radius);
+                rounded_square(inner_width, corner_r_mid);
         translate([0, 0, z3])
             linear_extrude(0.01)
-                rounded_square(top_opening, corner_radius);
+                rounded_square(top_opening, corner_r_top);
     }
 }
 
 difference() {
     translate([plate_x / 2, plate_y / 2, 0])
         linear_extrude(total_height)
-            rounded_rect(plate_x, plate_y, corner_radius);
+            rounded_rect(plate_x, plate_y, corner_r_top);
 
     for (ix = [0 : grid_x - 1]) {
         for (iy = [0 : grid_y - 1]) {
