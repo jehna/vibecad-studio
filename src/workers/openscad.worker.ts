@@ -49,6 +49,12 @@ const api = {
     openscad.FS.writeFile("/input.scad", scadSource);
 
     const args: string[] = ["/input.scad", "-o", "/output.stl"];
+
+    // Higher polygon count for smoother curves (OpenSCAD default is very low)
+    if (!("$fn" in params)) {
+      args.push("-D", "$fn=64");
+    }
+
     for (const [key, value] of Object.entries(params)) {
       args.push("-D", `${key}=${value}`);
     }
