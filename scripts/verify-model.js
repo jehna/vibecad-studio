@@ -5,7 +5,8 @@
  * Usage: node scripts/verify-model.js src/models/example-box/model.scad [-D name=value]
  */
 
-import { readFileSync } from "fs";
+import { readFileSync, readdirSync, existsSync } from "fs";
+import { join, dirname } from "path";
 import { createOpenSCAD } from "openscad-wasm";
 
 const args = process.argv.slice(2);
@@ -38,6 +39,19 @@ const instance = await createOpenSCAD({
 });
 
 const openscad = instance.getInstance();
+
+// Write shared lib files to WASM FS
+const libDir = join(dirname(scadPath), "..", "models", "lib");
+const libDirAlt = join(dirname(scadPath), "../lib");
+for (const dir of [libDir, libDirAlt]) {
+  if (existsSync(dir)) {
+    for (const f of readdirSync(dir).filter((f) => f.endsWith(".scad"))) {
+      openscad.FS.writeFile(`/${f}`, readFileSync(join(dir, f), "utf-8"));
+    }
+    break;
+  }
+}
+
 openscad.FS.writeFile("/input.scad", source);
 
 const cmdArgs = ["/input.scad", "-o", "/output.stl"];

@@ -40,11 +40,16 @@ const api = {
 
   async render(
     scadSource: string,
-    params: Record<string, number> = {}
+    params: Record<string, number> = {},
+    libs: Record<string, string> = {}
   ): Promise<{ stl: Uint8Array | null; logs: string[]; errors: string[] }> {
     // Fresh instance for each render — callMain corrupts global state
     const inst = await createInstance();
     const openscad = inst.getInstance();
+
+    for (const [filename, source] of Object.entries(libs)) {
+      openscad.FS.writeFile(`/${filename}`, source);
+    }
 
     openscad.FS.writeFile("/input.scad", scadSource);
 

@@ -6,6 +6,27 @@ const scadModules = import.meta.glob<string>("./*/model.scad", {
   eager: true,
 });
 
+const scadLibs = import.meta.glob<string>("./lib/*.scad", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
+
+function buildLibs(): Record<string, string> {
+  const libs: Record<string, string> = {};
+  for (const [path, source] of Object.entries(scadLibs)) {
+    const filename = path.split("/").pop()!;
+    libs[filename] = source;
+  }
+  return libs;
+}
+
+const libs = buildLibs();
+
+export function getLibs(): Record<string, string> {
+  return libs;
+}
+
 export interface ModelEntry {
   slug: string;
   name: string;

@@ -2,7 +2,7 @@ import { types, flow, getSnapshot } from "mobx-state-tree";
 import { autorun } from "mobx";
 
 import api from "@/utils/openscadAPI";
-import { getModelSource } from "@/models";
+import { getModelSource, getLibs } from "@/models";
 import { parseScad } from "@/utils/scadParser";
 import UIState from "./ui-state";
 import CodeState from "./code-state";
@@ -101,7 +101,7 @@ const AppState = types
       self.processing = true;
 
       try {
-        const result = yield api.render(self.scadSource, params || {});
+        const result = yield api.render(self.scadSource, params || {}, getLibs());
 
         self.logs = result.logs;
         self.errors = result.errors;
