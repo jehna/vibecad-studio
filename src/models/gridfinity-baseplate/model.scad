@@ -1,7 +1,7 @@
 // Gridfinity-compatible baseplate for organizing modular storage bins
 grid_x = 2; // [1:1:20]
 grid_y = 2; // [1:1:20]
-grid_unit = 42; // [40:0.5:44]
+grid_unit = 42; // [40:0.5:47]
 
 /* Gridfinity spec constants */
 chamfer_top = 2.15;
